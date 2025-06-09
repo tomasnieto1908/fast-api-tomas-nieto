@@ -1,28 +1,27 @@
+from sqlmodel import SQLModel, Field, create_engine, Session
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from typing import Optional
+from datetime import datetime
 
 DATABASE_URL = "sqlite+aiosqlite:///./test.db"  # Cambia a PostgreSQL si es necesario
 
 # Crear el motor de la base de datos
 engine = create_async_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+SessionLocal = Session  # Usado con AsyncSession más adelante si lo necesitás
 
 # Definición del modelo de Producto
-class Product(Base):
-    __tablename__ = "products"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    stock = Column(Integer)
+class Product(SQLModel, table=True):
+    __tablename__ = "products"    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
+    stock: int
 
 # Definición del modelo de Pedido
-class Order(Base):
+class Order(SQLModel, table=True):
     __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, index=True)
-    status = Column(String, default="Pendiente")
-    created_at = Column(DateTime)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    customer_id: int = Field(index=True)
+    status: str = Field(default="Pendiente")
+    created_at: datetime
